@@ -1,57 +1,57 @@
 <?php
 
-
 /* Made By Thunder33345 */
-
 
 class DiscordHook
 {
 
-  public static function send(Massage $massage)
+  public static function send(Message $message)
   {
-    $user = $massage->getUser();
+    $user = $message->getUser();
     $url = $user->getUrl();
     $username = $user->getUsername();
     $avatar_url = $user->getAvatarUrl();
-    $content = $massage->getContent();
+    $content = $message->getContent();
 
     $data = [];
-    if (!is_null($user)) $data["username"] = $username;
+    if (!is_null($username)) $data["username"] = $username;
     if (!is_null($avatar_url)) $data["avatar_url"] = $avatar_url;
     if (!is_null($content)) $data["content"] = $content;
 
-    if ($massage->getMode() == "embed") {
-      if ($massage->hasEmbed()) {
-        foreach ($massage->getEmbeds() as $embed)
+    if ($message->getMode() == "embed") {
+      if ($message->hasEmbed()) {
+        foreach ($message->getEmbeds() as $embed)
           $data["embeds"][] = $embed->getAsArray();
       }
       $send = json_encode($data);
-    } elseif ($massage->getMode() == "upload") {
-      $data['file'] = curl_file_create($massage->getUpload()->getFile(), null, $massage->getUpload()->getName());
+    } elseif ($message->getMode() == "upload") {
+      $data['file'] = curl_file_create($message->getUpload()->getFile(), null, $message->getUpload()->getName());
       $send = $data;
-    } else {
+    } else
       $send = json_encode($data);
-    }
+
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_POST, 1);
-    if ($massage->getMode() == "upload") curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: multipart/form-data']);
-    else curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    if ($message->getMode() == "upload")
+      curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: multipart/form-data']);
+    else
+      curl_setopt($curl, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_POSTFIELDS, $send);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
     curl_setopt($curl, CURLOPT_HEADER, true);
+    curl_setopt($curl, CURLOPT_POSTFIELDS, $send);
 
     $raw = curl_exec($curl);
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $headers = self::phraseHeaders(substr($raw, 0, $header_size));
     $raw = substr($raw, $header_size);
 
-    $json = json_decode($raw, true);
+    $json = @json_decode($raw, true);
 
     $info["sent"]["array"] = $data;
-    if (is_string($send)) $info["sent"]["json"] = $send;
+    $info["sent"]["json"] = $send;
 
     $info["http_code"] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
     $info["headers"] = $headers;
@@ -75,8 +75,7 @@ class DiscordHook
 
 }
 
-
-class Massage
+class Message
 {
   /** @var User */
   private $user;
@@ -99,14 +98,11 @@ class Massage
       } elseif (is_array($extension)) {
         foreach ($extension as $embed) if ($embed instanceof Embed) $this->embeds[] = $embed;
         if (count($this->embeds) >= 1) $this->mode = "embed";
-      } elseif ($extension instanceof Embed) {
-        $this->embeds[] = $extension;
-        $this->mode = "embed";
       }
 
   }
 
-  public function getUser():User { return $this->user; }
+  public function getUser(): User { return $this->user; }
 
   public function setUser(User $user)
   {
@@ -131,7 +127,6 @@ class Massage
   public function getEmbeds() { return $this->embeds; }
 }
 
-
 class User
 {
   private $url = null;
@@ -145,7 +140,7 @@ class User
     $this->avatar_url = $avarar_url;
   }
 
-  public function getUrl():string { return $this->url; }
+  public function getUrl(): string { return $this->url; }
 
   public function setUrl($url)
   {
@@ -170,7 +165,6 @@ class User
   }
 }
 
-
 class Upload
 {
   private $file;
@@ -193,7 +187,6 @@ class Upload
   }
 }
 
-
 class Embed
 {
   private $title;
@@ -201,13 +194,14 @@ class Embed
   private $url;
   private $color;
   //todo work on extras(added only as placeholder)
-  private $footer;
-  private $image;
   private $thumbnail;
   private $video;
+  private $image;
   private $providor;
   private $author;
-  private $fields;
+  private $footer;
+  private $field;
+  private $attatchment;
 
   public function __construct(?String $title = null, ?String $description = null, ?String $url = null, ?int $color = null)
   {
@@ -245,7 +239,7 @@ class Embed
     if (!is_null($this->descrption)) $array["description"] = $this->descrption;
     if (!is_null($this->url)) $array["url"] = $this->url;
     if (!is_null($this->color)) $array["color"] = $this->color;
-
+    
     return $array;
   }
 }
