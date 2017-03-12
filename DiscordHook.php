@@ -5,7 +5,7 @@
 class DiscordHook
 {
 
-  public static function send(Message $message)
+  public static function send(Message $message, $curlOpts = [])
   {
     $user = $message->getUser();
     $url = $user->getUrl();
@@ -42,6 +42,7 @@ class DiscordHook
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
     curl_setopt($curl, CURLOPT_HEADER, true);
     curl_setopt($curl, CURLOPT_POSTFIELDS, $send);
+    curl_setopt_array($curl, $curlOpts);
 
     $raw = curl_exec($curl);
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
@@ -54,6 +55,11 @@ class DiscordHook
     $info["sent"]["json"] = $send;
 
     $info["http_code"] = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    if (curl_errno($curl)) {
+      $errorcode = curl_errno($curl);
+      $info["curl_code"] = $errorcode;
+      $info["curl_reason"] = curl_strerror($errorcode);
+    }
     $info["headers"] = $headers;
     $info["json"] = $json;
     $info["raw"] = $raw;
@@ -239,7 +245,7 @@ class Embed
     if (!is_null($this->descrption)) $array["description"] = $this->descrption;
     if (!is_null($this->url)) $array["url"] = $this->url;
     if (!is_null($this->color)) $array["color"] = $this->color;
-    
+
     return $array;
   }
 }
