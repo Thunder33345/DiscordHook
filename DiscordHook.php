@@ -93,10 +93,10 @@ class Message
   /** @var Embed[] */
   private $embeds;
 
-  public function __construct(User $user, ?String $content, $extension = null)
+  public function __construct(User $user, $content, $extension = null)
   {
     $this->user = $user;
-    $this->content = $content;
+    if (isset($content)) $this->content = $content;
     if (!is_null($extension))
       if ($extension instanceof Upload) {
         $this->file = $extension;
@@ -116,7 +116,7 @@ class Message
     return $this;
   }
 
-  public function getContent():?String { return $this->content; }
+  public function getContent() { return $this->content; }
 
   public function setContent(String $content)
   {
@@ -139,11 +139,11 @@ class User
   private $username = null;
   private $avatar_url = null;
 
-  public function __construct(string $url, ?string $username = null, ?string $avarar_url = null)
+  public function __construct(string $url, $username = null, $avarar_url = null)
   {
     $this->url = $url;
-    $this->username = $username;
-    $this->avatar_url = $avarar_url;
+    if (!is_null($username)) $this->username = $username;
+    if (!is_null($avarar_url)) $this->avatar_url = $avarar_url;
   }
 
   public function getUrl(): string { return $this->url; }
@@ -154,7 +154,7 @@ class User
     return $this;
   }
 
-  public function getUsername():?string { return $this->username; }
+  public function getUsername() { return $this->username; }
 
   public function setUsername(string $username)
   {
@@ -162,7 +162,7 @@ class User
     return $this;
   }
 
-  public function getAvatarUrl():?string { return $this->avatar_url; }
+  public function getAvatarUrl() { return $this->avatar_url; }
 
   public function setAvatarUrl(string $avatar_url)
   {
@@ -176,7 +176,7 @@ class Upload
   private $file;
   private $name;
 
-  public function __construct(String $filePath, ?String $name = null)
+  public function __construct(String $filePath, $name = null)
   {
     $this->file = realpath($filePath);
     if ($name == null) $this->name = basename($filePath); else $this->name = $name;
@@ -209,7 +209,7 @@ class Embed
   private $field;
   private $attatchment;
 
-  public function __construct(?String $title = null, ?String $description = null, ?String $url = null, ?int $color = null)
+  public function __construct($title = null, $description = null, $url = null, $color = null)
   {
     $this->title = $title;
     $this->descrption = $description;
