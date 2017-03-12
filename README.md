@@ -2,6 +2,8 @@
 PHP Discord WebHook Library
 Simple, All Cointained in One file!
 
+## This is the PHP 7.0.0 Branch!
+
 Example:
 
 To send a massage...
