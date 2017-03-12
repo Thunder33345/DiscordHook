@@ -5,7 +5,7 @@
 class DiscordHook
 {
 
-  public static function send(Message $message, $curlOpts = [])
+  public static function send(Message $message,array $curlOpts = [])
   {
     $user = $message->getUser();
     $url = $user->getUrl();
